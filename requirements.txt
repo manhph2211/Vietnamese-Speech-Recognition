@@ -1,0 +1,9 @@
+pyyaml
+easydict
+youtokentome
+wandb
+torchaudio
+librosa
+python-Levenshtein
+audiomentations
+pytorch_warmup
