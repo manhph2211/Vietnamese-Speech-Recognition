@@ -5,8 +5,8 @@ from torch.utils.data import Subset
 
 class LJSpeechDataset(torchaudio.datasets.LJSPEECH):
     def __init__(self, transforms, *args, **kwargs):
-        if kwargs.get('download', False):
-            os.makedirs(kwargs['root'], exist_ok=True)
+        # if kwargs.get('download', False):
+        #     os.makedirs(kwargs['root'], exist_ok=True)
         super(LJSpeechDataset, self).__init__(*args, **kwargs)
         self.transforms = transforms
 
@@ -23,17 +23,17 @@ class LJSpeechDataset(torchaudio.datasets.LJSPEECH):
 
 def get_dataset(config, transforms=lambda x: x, part='train'):
     if part == 'train':
-        dataset = LJSpeechDataset(root=config.dataset.root, download=True, transforms=transforms)
+        dataset = LJSpeechDataset(root=config.dataset.root, download=False, transforms=transforms)
         indices = list(range(len(dataset)))
         dataset = Subset(dataset, indices[:int(config.dataset.get('train_part', 0.95) * len(dataset))])
         return dataset
     elif part == 'val':
-        dataset = LJSpeechDataset(root=config.dataset.root, download=True, transforms=transforms)
+        dataset = LJSpeechDataset(root=config.dataset.root, download=False, transforms=transforms)
         indices = list(range(len(dataset)))
         dataset = Subset(dataset, indices[int(config.dataset.get('train_part', 0.95) * len(dataset)):])
         return dataset
     elif part == 'bpe':
-        dataset = LJSpeechDataset(root=config.dataset.root, download=True, transforms=transforms)
+        dataset = LJSpeechDataset(root=config.dataset.root, download=False, transforms=transforms)
         indices = list(range(len(dataset)))[:int(config.dataset.get('train_part', 0.95) * len(dataset))]
         return dataset, indices
     else:
