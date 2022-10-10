@@ -198,12 +198,13 @@ def train(config):
             wandb.save(os.path.join(config.train.get('checkpoint_path', 'checkpoints'), f'model_{epoch_idx}_{prev_wer}.pth'))
 
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Training model.')
     parser.add_argument('--config', default='configs/config.yml',
                         help='path to config file')
     args = parser.parse_args()
+    
     with open(args.config, 'r') as f:
         config = edict(yaml.safe_load(f))
+
     train(config)

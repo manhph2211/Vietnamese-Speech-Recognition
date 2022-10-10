@@ -13,7 +13,7 @@ train:
   clip_grad_norm: 15
   epochs: 42
   optimizer:
-    lr: 0.0005 # 0.0003 - Karpathy great constant for Adam
+    lr: 0.0005 # 0.0003 
     weight_decay: 0.0001 # leave default
 
 wandb:
@@ -23,4 +23,3 @@ model:
   name: _quartznet5x5_config
   vocab_size: 120
   feat_in: 64
-  # init_mode: kaiming_normal
