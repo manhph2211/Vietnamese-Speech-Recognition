@@ -10,18 +10,18 @@ def get_text(path_to_script_file):
     return text
 
 
-def make(root='data', name='vlsp2020_train_set_02', save='custom_data'):
+def make(root='data', name='vlsp2020_train_set_02', save='LJSpeech-1.1'):
     if not os.path.isdir(os.path.join(root, save, 'wavs')):
         os.mkdir(os.path.join(root, save, 'wavs'))
     all_audio_file_paths = glob.glob(os.path.join(root, name,"*.wav"))
     all_script_file_paths = glob.glob(os.path.join(root, name,"*.txt"))
     for audio_file in tqdm(all_audio_file_paths):
-        file_name = audio_file.split('\\')[-1]
+        file_name = audio_file.split('/')[-1]
         os.rename(audio_file, os.path.join(root,save,"wavs",file_name))
     with open(os.path.join(root,save,'metadata.csv'), 'w', encoding='UTF8', newline='') as f:
         writer = csv.writer(f, delimiter="|")
         for text_file in tqdm(all_script_file_paths):
-            file_name = text_file.split("\\")[-1].split(".")[0]
+            file_name = text_file.split("/")[-1].split(".")[0]
             text = get_text(text_file)
             row = [file_name,text,text]
             writer.writerow(row)

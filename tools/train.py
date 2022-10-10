@@ -130,7 +130,7 @@ def train(config):
 
     criterion = nn.CTCLoss(blank=0, reduction='mean', zero_infinity=True)
     # criterion = nn.CTCLoss(blank=config.model.vocab_size)
-    decoder = BeamCTCDecoder(bpe=bpe)
+    decoder = GreedyDecoder(bpe=bpe)
 
     prev_wer = 1000
     wandb.init(project=config.wandb.project, config=config)
@@ -162,10 +162,9 @@ def train(config):
                     "train_cer": cer,
                     "train_samples": wandb.Table(
                         columns=['gt_text', 'pred_text'],
-                        data=zip(target_strings, decoded_output)
+                        data=list(zip(target_strings, decoded_output))
                     )
                 }, step=step)
-
         # validate:
         model.eval()
         val_stats = defaultdict(list)
@@ -202,7 +201,7 @@ def train(config):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Training model.')
-    parser.add_argument('--config', default='configs/train_LJSpeech.yml',
+    parser.add_argument('--config', default='configs/config.yml',
                         help='path to config file')
     args = parser.parse_args()
     with open(args.config, 'r') as f:
