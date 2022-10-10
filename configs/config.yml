@@ -1,15 +1,15 @@
 dataset:
-  root: data/custom_data
+  root: data/
   train_part: 0.95
-  name: vlsp
+  name: custom_data
   sample_rate: 22050
 bpe:
   train: true
   model_path: yttm.bpe
 train:
   seed: 42
-  num_workers: 16
-  batch_size: 32
+  num_workers: 4
+  batch_size: 1
   clip_grad_norm: 15
   epochs: 42
   optimizer:

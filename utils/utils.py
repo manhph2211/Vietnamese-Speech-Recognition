@@ -5,7 +5,8 @@ import data
 import youtokentome as yttm
 import os
 import importlib
-from data.transforms import TextPreprocess
+from datasets.transforms import TextPreprocess
+from datasets.dataset import get_dataset
 
 
 def fix_seeds(seed=42):
@@ -22,10 +23,9 @@ def remove_from_dict(the_dict, keys):
     return the_dict
 
 def prepare_bpe(config):
-    dataset_module = importlib.import_module(f'.{config.dataset.name}', data.__name__)
     # train BPE
     if config.bpe.get('train', False):
-        dataset, ids = dataset_module.get_dataset(config, part='bpe', transforms=TextPreprocess())
+        dataset, ids = get_dataset(config, part='bpe', transforms=TextPreprocess())
         train_data_path = 'bpe_texts.txt'
         with open(train_data_path, "w") as f:
             # run ovefr only train part
