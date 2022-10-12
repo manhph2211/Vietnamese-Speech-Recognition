@@ -8,18 +8,20 @@ bpe:
   model_path: yttm.bpe
 train:
   seed: 42
-  num_workers: 4
-  batch_size: 1
-  clip_grad_norm: 15
-  epochs: 42
+  num_workers: 8
+  batch_size: 16
+  clip_grad_norm: 3
+  epochs: 100
   optimizer:
     lr: 0.0005 # 0.0003 
     weight_decay: 0.0001 # leave default
+  # from_checkpoint: checkpoints/model_26_0.7433850436343121.pth
 
 wandb:
   project: Vietnamsese Speech Recognition
   log_interval: 20
 model:
   name: _quartznet5x5_config
-  vocab_size: 120
+  vocab_size: 150
   feat_in: 64
+

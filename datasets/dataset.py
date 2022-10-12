@@ -13,12 +13,12 @@ class LJSpeechDataset(torchaudio.datasets.LJSPEECH):
 
     def __getitem__(self, idx):
         audio, sample_rate, _, norm_text = super().__getitem__(idx)
-        return self.transforms({'audio' : audio, 'text': norm_text, 'sample_rate': sample_rate})
+        return self.transforms({'audio' : audio, 'text': norm_text.upper(), 'sample_rate': sample_rate})
 
     def get_text(self, n):
         line = self._flist[n]
         fileid, transcript, normalized_transcript = line
-        return self.transforms({'text' : normalized_transcript})['text']
+        return self.transforms({'text' : normalized_transcript.upper()})['text']
 
 
 def get_dataset(config, transforms=lambda x: x, part='train'):

@@ -135,10 +135,11 @@ def train(config):
     prev_wer = 1000
     wandb.init(project=config.wandb.project, config=config)
     wandb.watch(model, log="all", log_freq=config.wandb.get('log_interval', 5000))
-    for epoch_idx in tqdm(range(config.train.get('epochs', 10))):
+    for epoch_idx in tqdm(range(config.train.get('epochs'))):
         # train:
         model.train()
-        for batch_idx, batch in enumerate(train_dataloader):
+        print("START TRAINING...")
+        for batch_idx, batch in tqdm(enumerate(train_dataloader)):
             batch = batch_transforms_train(batch)
             optimizer.zero_grad()
             logits = model(batch['audio'])
@@ -150,7 +151,7 @@ def train(config):
             lr_scheduler.step()
             # warmup_scheduler.dampen()
 
-            if batch_idx % config.wandb.get('log_interval', 5000) == 0:
+            if batch_idx % config.wandb.get('log_interval') == 0:
                 target_strings = decoder.convert_to_strings(batch['text'])
                 decoded_output = decoder.decode(logits.permute(0, 2, 1).softmax(dim=2))
                 wer = np.mean([decoder.wer(true, pred) for true, pred in zip(target_strings, decoded_output)])
@@ -165,10 +166,11 @@ def train(config):
                         data=list(zip(target_strings, decoded_output))
                     )
                 }, step=step)
+        print("START VALIDATING...")
         # validate:
         model.eval()
         val_stats = defaultdict(list)
-        for batch_idx, batch in enumerate(val_dataloader):
+        for batch_idx, batch in tqdm(enumerate(val_dataloader)):
             batch = batch_transforms_val(batch)
             with torch.no_grad():
                 logits = model(batch['audio'])
@@ -184,7 +186,7 @@ def train(config):
             val_stats['cer'].append(cer)
         for k, v in val_stats.items():
             val_stats[k] = np.mean(v)
-        val_stats['val_samples'] = wandb.Table(columns=['gt_text', 'pred_text'], data=zip(target_strings, decoded_output))
+        val_stats['val_samples'] = wandb.Table(columns=['gt_text', 'pred_text'], data=list(zip(target_strings, decoded_output)))
         wandb.log(val_stats, step=step)
 
         # save model, TODO: save optimizer:
