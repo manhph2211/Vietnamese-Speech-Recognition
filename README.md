@@ -3,17 +3,34 @@ Vietnamese-Speech-Recognition
 
 # Introduction
 
-In this repo, I focused on building end-to-end speech recognition pipeline using [Quartznet]() and [CTC decoder]() supported by beam search algorithm as well as language model. 
+In this repo, I focused on building end-to-end speech recognition pipeline using [Quartznet](https://arxiv.org/abs/1910.10261) and [CTC decoder](https://github.com/parlance/ctcdecode) supported by beam search algorithm as well as language model. 
 
 # Setup 
 
 ## Datasets
 
-Here I used [100h speech public dataset]() of **Vinbigdata** , which is a small clean set of [VLSP2020 ASR competition](). Some infomation of this dataset can be found at `data/Data_Workspace.ipynb`. The data format I would use to train and evaluate is just like [LJSpeech](), so I create `data/custom.py` to customize the given dataset.
+Here I used [100h speech public dataset](https://institute.vinbigdata.org/events/vinbigdata-chia-se-100-gio-du-lieu-tieng-noi-cho-cong-dong/) of **Vinbigdata** , which is a small clean set of [VLSP2020 ASR competition](https://vlsp.org.vn/vlsp2020). Some infomation of this dataset can be found at `data/Data_Workspace.ipynb`. The data format I would use to train and evaluate is just like [LJSpeech](), so I create `data/custom.py` to customize the given dataset.
 
 ```
 mkdir data/LJSpeech-1.1 
 python data/custom.py
+```
+
+And below is the folder that I used, note that `metadata.csv` has 2 columns, `file name` and `transcript`:
+
+```
+├───data
+│   ├───LJSpeech-1.1
+│   │   └───wavs
+│   │   └───metadata.csv
+│   └───vlsp2020_train_set_02
+├───datasets
+├───demo
+├───models
+│   └───quartznet
+│       └───base
+├───tools
+└───utils
 ```
 
 ## Environment
@@ -31,8 +48,7 @@ Also, you need to install **ctcdecode**:
 
 ```
 git clone --recursive https://github.com/parlance/ctcdecode.git
-cd ctcdecode && pip install .
-cd ..
+cd ctcdecode && pip install . && cd ..
 ```
 
 # Tools
@@ -66,3 +82,5 @@ I used wandb for logging results and antifacts during training, here are some vi
 
 # References
 
+- Mainly based on [this implementation](https://github.com/oleges1/quartznet-pytorch)
+- The [paper](https://arxiv.org/abs/1910.10261)
