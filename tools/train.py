@@ -7,7 +7,7 @@ from collections import defaultdict
 import math
 import argparse
 import importlib
-
+import pdb
 # torchim:
 import torch
 from torch import nn
@@ -135,11 +135,13 @@ def train(config):
     prev_wer = 1000
     wandb.init(project=config.wandb.project, config=config)
     wandb.watch(model, log="all", log_freq=config.wandb.get('log_interval', 5000))
-    for epoch_idx in tqdm(range(config.train.get('epochs'))):
+    for epoch_idx in range(config.train.get('epochs')):
         # train:
         model.train()
         print("START TRAINING...")
-        for batch_idx, batch in tqdm(enumerate(train_dataloader)):
+        print("Epoch: ", epoch_idx)
+        for batch_idx, batch in enumerate(tqdm(train_dataloader)):
+            pdb.set_trace()
             batch = batch_transforms_train(batch)
             optimizer.zero_grad()
             logits = model(batch['audio'])
@@ -195,9 +197,9 @@ def train(config):
             prev_wer = val_stats['wer']
             torch.save(
                 model.state_dict(),
-                os.path.join(config.train.get('checkpoint_path', 'checkpoints'), f'model_{epoch_idx}_{prev_wer}.pth')
+                os.path.join(config.train.get('checkpoint_path', 'checkpoints'), 'best.pth')
             )
-            wandb.save(os.path.join(config.train.get('checkpoint_path', 'checkpoints'), f'model_{epoch_idx}_{prev_wer}.pth'))
+            wandb.save(os.path.join(config.train.get('checkpoint_path', 'checkpoints'), 'best.pth'))
 
 
 if __name__ == '__main__':

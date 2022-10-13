@@ -1,8 +1,10 @@
 pyyaml
 easydict
+Cython
 youtokentome
 wandb
-torchaudio
+tqdm
+# torchaudio
 librosa
 python-Levenshtein
 audiomentations
