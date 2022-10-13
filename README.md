@@ -51,11 +51,17 @@ And evaludate:
 python3 tools/evaluate.py --config configs/config.yaml
 ```
 
-## Inference
+## Demo
+
+This time, I provide small code with streamlit for asr demo, you can run:
+```
+stream run demo/app.py
+```
 
 # Results
 
 I used wandb for logging results and antifacts during training, here are some visualizations after several epochs:
+![image](https://user-images.githubusercontent.com/61444616/195522590-ae3267bf-0a15-4407-ab0f-4d1aca3b20d6.png)
 
 
 # References
