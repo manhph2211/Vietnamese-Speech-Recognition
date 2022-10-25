@@ -1,0 +1,5 @@
+backbone: nguyenvulebinh/wav2vec2-base-vietnamese-250h
+learning_rate: null
+lr_scheduler: null
+optimizer: Adam
+processor_backbone: nguyenvulebinh/wav2vec2-base-vietnamese-250h

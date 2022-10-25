@@ -1,21 +1,21 @@
 dataset:
   root: data/
   train_part: 0.95
-  name: custom_data
+  name: vlsp2019_train_set # custom name
   sample_rate: 22050
 bpe:
   train: true
   model_path: yttm.bpe
 train:
   seed: 42
-  num_workers: 8
+  num_workers: 10
   batch_size: 16
   clip_grad_norm: 3
   epochs: 500
   optimizer:
-    lr: 0.0005 # 0.0003 
+    lr: 0.0001 # 0.0003 
     weight_decay: 0.0001 # leave default
-  from_checkpoint: checkpoints/model_53_0.8603010370630839.pth
+  from_checkpoint: checkpoints/best.pth
 
 wandb:
   project: Vietnamsese Speech Recognition

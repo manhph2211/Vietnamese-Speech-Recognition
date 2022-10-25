@@ -16,6 +16,8 @@ from torch.utils.data import DataLoader, Subset, ConcatDataset
 import numpy as np
 import pytorch_warmup as warmup
 
+from torch.profiler import profile, record_function, ProfilerActivity
+
 # data:
 from datasets.dataset import get_dataset
 from datasets.collate import collate_fn, gpu_collate, no_pad_collate
@@ -113,7 +115,7 @@ def train(config):
                 batch_size=config.train.get('batch_size', 1), collate_fn=no_pad_collate)
 
     val_dataloader = DataLoader(val_dataset, num_workers=config.train.get('num_workers', 4),
-                batch_size=1, collate_fn=no_pad_collate)
+                batch_size=4, collate_fn=no_pad_collate)
 
     model = QuartzNet(**remove_from_dict(config.model, ['name']))
 
@@ -127,7 +129,8 @@ def train(config):
 
     if torch.cuda.is_available():
         model = model.cuda()
-
+        torch.backends.cudnn.benchmark = True
+        
     criterion = nn.CTCLoss(blank=0, reduction='mean', zero_infinity=True)
     # criterion = nn.CTCLoss(blank=config.model.vocab_size)
     decoder = GreedyDecoder(bpe=bpe)
@@ -138,13 +141,19 @@ def train(config):
     for epoch_idx in range(config.train.get('epochs')):
         # train:
         model.train()
-        print("START TRAINING...")
         print("Epoch: ", epoch_idx)
         for batch_idx, batch in enumerate(tqdm(train_dataloader)):
-            pdb.set_trace()
+            # pdb.set_trace()
+            torch.backends.cudnn.benchmark = True
             batch = batch_transforms_train(batch)
+            torch.backends.cudnn.benchmark = True
             optimizer.zero_grad()
+            
+            # with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True) as prof:
+            #     with record_function("model_inference"):
             logits = model(batch['audio'])
+
+            # print(prof.key_averages().table(sort_by="cuda_time_total", row_limit=10))
             output_length = torch.ceil(batch['input_lengths'].float() / model.stride).int()
             loss = criterion(logits.permute(2, 0, 1).log_softmax(dim=2), batch['text'], output_length, batch['target_lengths'])
             loss.backward()
@@ -168,38 +177,39 @@ def train(config):
                         data=list(zip(target_strings, decoded_output))
                     )
                 }, step=step)
-        print("START VALIDATING...")
-        # validate:
-        model.eval()
-        val_stats = defaultdict(list)
-        for batch_idx, batch in tqdm(enumerate(val_dataloader)):
-            batch = batch_transforms_val(batch)
-            with torch.no_grad():
-                logits = model(batch['audio'])
-                output_length = torch.ceil(batch['input_lengths'].float() / model.stride).int()
-                loss = criterion(logits.permute(2, 0, 1).log_softmax(dim=2), batch['text'], output_length, batch['target_lengths'])
+        
+        if True: #epoch_idx % 2 == 0:
+            # validate:
+            model.eval()
+            val_stats = defaultdict(list)
+            for batch_idx, batch in enumerate(tqdm(val_dataloader)):
+                batch = batch_transforms_val(batch)
+                with torch.no_grad():
+                    logits = model(batch['audio'])
+                    output_length = torch.ceil(batch['input_lengths'].float() / model.stride).int()
+                    loss = criterion(logits.permute(2, 0, 1).log_softmax(dim=2), batch['text'], output_length, batch['target_lengths'])
 
-            target_strings = decoder.convert_to_strings(batch['text'])
-            decoded_output = decoder.decode(logits.permute(0, 2, 1).softmax(dim=2))
-            wer = np.mean([decoder.wer(true, pred) for true, pred in zip(target_strings, decoded_output)])
-            cer = np.mean([decoder.cer(true, pred) for true, pred in zip(target_strings, decoded_output)])
-            val_stats['val_loss'].append(loss.item())
-            val_stats['wer'].append(wer)
-            val_stats['cer'].append(cer)
-        for k, v in val_stats.items():
-            val_stats[k] = np.mean(v)
-        val_stats['val_samples'] = wandb.Table(columns=['gt_text', 'pred_text'], data=list(zip(target_strings, decoded_output)))
-        wandb.log(val_stats, step=step)
+                target_strings = decoder.convert_to_strings(batch['text'])
+                decoded_output = decoder.decode(logits.permute(0, 2, 1).softmax(dim=2))
+                wer = np.mean([decoder.wer(true, pred) for true, pred in zip(target_strings, decoded_output)])
+                cer = np.mean([decoder.cer(true, pred) for true, pred in zip(target_strings, decoded_output)])
+                val_stats['val_loss'].append(loss.item())
+                val_stats['wer'].append(wer)
+                val_stats['cer'].append(cer)
+            for k, v in val_stats.items():
+                val_stats[k] = np.mean(v)
+            val_stats['val_samples'] = wandb.Table(columns=['gt_text', 'pred_text'], data=list(zip(target_strings, decoded_output)))
+            wandb.log(val_stats, step=step)
 
-        # save model, TODO: save optimizer:
-        if val_stats['wer'] < prev_wer:
-            os.makedirs(config.train.get('checkpoint_path', 'checkpoints'), exist_ok=True)
-            prev_wer = val_stats['wer']
-            torch.save(
-                model.state_dict(),
-                os.path.join(config.train.get('checkpoint_path', 'checkpoints'), 'best.pth')
-            )
-            wandb.save(os.path.join(config.train.get('checkpoint_path', 'checkpoints'), 'best.pth'))
+            # save model, TODO: save optimizer:
+            if val_stats['wer'] < prev_wer:
+                os.makedirs(config.train.get('checkpoint_path', 'checkpoints'), exist_ok=True)
+                prev_wer = val_stats['wer']
+                torch.save(
+                    model.state_dict(),
+                    os.path.join(config.train.get('checkpoint_path', 'checkpoints'), 'best.pth')
+                )
+                wandb.save(os.path.join(config.train.get('checkpoint_path', 'checkpoints'), 'best.pth'))
 
 
 if __name__ == '__main__':
