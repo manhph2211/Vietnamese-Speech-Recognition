@@ -12,4 +12,4 @@ CMD git clone --recursive https://github.com/parlance/ctcdecode.git
 CMD cd ctcdecode && pip install . && cd ..
 
 CMD bash setup.sh
-CMD streamlit run deployment/app.py
+CMD streamlit run demo/app.py
