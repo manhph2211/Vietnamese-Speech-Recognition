@@ -3,7 +3,7 @@ Vietnamese-Speech-Recognition
 
 # Introduction
 
-In this repo, I focused on building end-to-end speech recognition pipeline using [Quartznet](https://arxiv.org/abs/1910.10261) and [CTC decoder](https://github.com/parlance/ctcdecode) supported by beam search algorithm as well as language model. 
+In this repo, I focused on building end-to-end speech recognition pipeline using [Quartznet](https://arxiv.org/abs/1910.10261), [wav2vec2.0](https://arxiv.org/abs/2006.11477) and [CTC decoder](https://github.com/parlance/ctcdecode) supported by beam search algorithm as well as language model. 
 
 # Setup 
 
@@ -13,7 +13,7 @@ Here I used [100h speech public dataset](https://institute.vinbigdata.org/events
 
 ```
 mkdir data/LJSpeech-1.1 
-python data/custom.py
+python data/custom.py # create data format for training quartnet & w2v2.0
 ```
 
 And below is the folder that I used, note that `metadata.csv` has 2 columns, `file name` and `transcript`:
@@ -61,10 +61,16 @@ For training the quartznet model, you can run:
 python3 tools/train.py --config configs/config.yaml
 ```
 
-And evaludate: 
+And evaludate quartnet: 
 
 ```
 python3 tools/evaluate.py --config configs/config.yaml
+```
+
+Or you wanna finetune wav2vec2.0 model from Vietnamese pretrained [w2v2.0](https://huggingface.co/nguyenvulebinh/wav2vec2-base-vietnamese-250h):
+
+```
+python3 tools/fintune_w2v.py
 ```
 
 ## Demo
@@ -76,11 +82,18 @@ stream run demo/app.py
 
 # Results
 
-I used wandb for logging results and antifacts during training, here are some visualizations after several epochs:
-![image](https://user-images.githubusercontent.com/61444616/195522590-ae3267bf-0a15-4407-ab0f-4d1aca3b20d6.png)
+I used wandb&tensorboard for logging results and antifacts during training, here are some visualizations after several epochs:
+
+Quartznet             |  W2v 2.0
+:-------------------------:|:-------------------------:
+![](https://user-images.githubusercontent.com/61444616/195522590-ae3267bf-0a15-4407-ab0f-4d1aca3b20d6.png)  |  ![](https://user-images.githubusercontent.com/61444616/197971160-14d44cb8-25f8-43d8-9071-16bc5ec59ca7.png)
 
 
 # References
 
 - Mainly based on [this implementation](https://github.com/oleges1/quartznet-pytorch)
 - The [paper](https://arxiv.org/abs/1910.10261)
+- Vietnamese ASR - [VietAI](https://github.com/vietai/ASR)
+- Lightning-Flash [repo](https://github.com/Lightning-AI/lightning-flash)
+- Tokenizer used from [youtokentome](https://github.com/VKCOM/YouTokenToMe)
+- Language model [KenLM](https://github.com/kpu/kenlm)
