@@ -83,7 +83,11 @@ stream run demo/app.py
 # Results
 
 I used wandb&tensorboard for logging results and antifacts during training, here are some visualizations after several epochs:
-![image](https://user-images.githubusercontent.com/61444616/195522590-ae3267bf-0a15-4407-ab0f-4d1aca3b20d6.png)
+
+Quartznet             |  W2v 2.0
+:-------------------------:|:-------------------------:
+![](https://user-images.githubusercontent.com/61444616/195522590-ae3267bf-0a15-4407-ab0f-4d1aca3b20d6.png)  |  ![](https://user-images.githubusercontent.com/61444616/197971160-14d44cb8-25f8-43d8-9071-16bc5ec59ca7.png)
+
 
 # References
 
