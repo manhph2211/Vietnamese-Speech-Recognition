@@ -79,6 +79,8 @@ This time, I provide small code with streamlit for asr demo, you can run:
 ```
 stream run demo/app.py
 ```
+![demo](https://github.com/manhph2211/Vietnamese-Speech-Recognition/blob/main/demo/assets/demo.gif)
+
 
 # Results
 
