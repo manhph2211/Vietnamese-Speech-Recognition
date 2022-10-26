@@ -163,7 +163,6 @@ def action(file_uploader, transformations):
     st.balloons()
 
 
-
 def recognize(file_path, audio):
     ds = {}
     ds["speech"] = audio
@@ -172,12 +171,14 @@ def recognize(file_path, audio):
     input_values = processor(ds["speech"], return_tensors="pt", padding="longest").input_values  # Batch size 1
 
     # retrieve logits
-    logits = model(input_values).logits
+    logits = model(input_values).logits[0]
 
     # take argmax and decode
-    predicted_ids = torch.argmax(logits, dim=-1)
-    transcription = processor.batch_decode(predicted_ids)
-    return transcription[0]
+    # predicted_ids = torch.argmax(logits, dim=-1)
+    # transcription = processor.batch_decode(predicted_ids)
+    transcription = ngram_lm_model.decode(logits.cpu().detach().numpy(), beam_width=500)
+
+    return transcription
 
 
 def main():
@@ -188,7 +189,19 @@ def main():
         "Once you have chosen augmentation techniques, select or upload an audio file\n. "
         'Then click "Apply" to start! \n\n'
     )
+
     if True:
+        col1, col2, col3 = st.columns([1,9,1])
+
+        with col1:
+            st.write("")
+
+        with col2:
+            st.image("demo/assets/demoo.gif")
+
+        with col3:
+            st.write("")
+
         st.subheader("Team members:")
         members = ''' 
             Pham Hung Manh\n
@@ -197,7 +210,9 @@ def main():
             Nguyen Nhu Toan\n
             Ho Nguyen Khang\n'''
         st.markdown(members)
+
         st.success("Manh Ph")
+    # st.sidebar.image("demo/assets/demoo.gif")
     st.sidebar.markdown("Choose the transformations here:")
     gaussian_noise = st.sidebar.checkbox("GaussianNoise")
     frequency_mask = st.sidebar.checkbox("FrequencyMask")
